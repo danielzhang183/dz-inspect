@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.0",
   "packageManager": "pnpm@8.5.1",
-  "description": "Node starter template with using ts",
+  "description": "Retro vite plugin inspect",
   "author": "Daniel Zhang",
   "license": "MIT",
   "homepage": "https://github.com/danielzhang183/dz-inspect#readme",
@@ -30,38 +30,59 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "*.d.ts"
   ],
   "scripts": {
-    "build": "unbuild",
-    "dev": "unbuild --stub",
+    "build": "rimraf dist && run-s build:*",
+    "build:client": "vite build src/client",
+    "build:js": "unbuild",
+    "dev": "pnpm stub && cross-env INSPECT_DEV=true vite src/client",
+    "dev:client": "vite build src/client --watch",
+    "stub": "unbuild --stub",
     "play": "vite playground",
+    "client": "vite src/client",
     "lint": "eslint .",
     "prepublishOnly": "npm run build",
-    "release": "bumpp && npm publish",
-    "start": "esno src/index.ts",
-    "test": "vitest",
-    "typecheck": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "@antfu/eslint-config": "^0.27.0",
-    "@types/debug": "^4.1.7",
-    "@types/node": "^18.16.10",
-    "bumpp": "^8.2.1",
-    "eslint": "^8.40.0",
-    "esno": "^0.16.3",
-    "pnpm": "^8.5.1",
-    "rimraf": "^3.0.2",
-    "typescript": "^4.9.5",
-    "unbuild": "^0.8.11",
-    "vite": "^3.2.6",
-    "vitest": "^0.23.4"
-  },
-  "eslintConfig": {
-    "extends": "@antfu"
+    "release": "bumpp && npm publish"
   },
   "dependencies": {
     "debug": "^4.3.4",
-    "sirv": "^2.0.3"
+    "sirv": "^2.0.3",
+    "ufo": "^1.1.2"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^0.27.0",
+    "@types/codemirror": "^5.60.7",
+    "@types/debug": "^4.1.7",
+    "@types/node": "^18.16.10",
+    "@unocss/preset-attributify": "^0.51.13",
+    "@unocss/preset-icons": "^0.51.13",
+    "@unocss/preset-mini": "^0.51.13",
+    "@unocss/reset": "^0.51.13",
+    "@vitejs/plugin-vue": "^4.2.3",
+    "@vueuse/core": "^10.1.2",
+    "bumpp": "^8.2.1",
+    "codemirror": "^5.65.8",
+    "codemirror-theme-vars": "^0.1.2",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.40.0",
+    "npm-run-all": "^4.1.5",
+    "pnpm": "^8.5.1",
+    "prism-theme-vars": "^0.2.4",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.9.5",
+    "unbuild": "^0.8.11",
+    "unocss": "^0.51.13",
+    "unplugin-auto-import": "^0.15.3",
+    "unplugin-vue-components": "^0.24.1",
+    "vite": "^4.3.4",
+    "vite-plugin-pages": "^0.29.0",
+    "vitest": "^0.23.4",
+    "vue": "^3.3.2",
+    "vue-router": "^4.2.0"
+  },
+  "eslintConfig": {
+    "extends": "@antfu"
   }
 }

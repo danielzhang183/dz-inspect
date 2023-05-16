@@ -1,21 +1,3 @@
-# node ts starter template
+# DZ inspect
 
-A node starter template with using typescript.
-
-## Installation
-
-```bash
-pnpm i
-```
-
-## Use as template
-
-```bash
-degit danielzhang183/node-ts-starter .
-```
-
-## Publish
-
-```bash
-pnpm release
-```
+Retro [vite-plugin-inspect]()
