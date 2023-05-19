@@ -21,7 +21,9 @@ export default defineConfig({
     Pages({
       dirs: 'pages',
     }),
-    UnoCSS(),
+    UnoCSS({
+      configFile: '../../uno.config.ts',
+    }),
     Inspect(),
     AutoImport({
       imports: [
