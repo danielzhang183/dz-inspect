@@ -3,72 +3,112 @@ import createDebug from 'debug'
 import sirv from 'sirv'
 import type { ModuleNode, Plugin, ResolvedConfig } from 'vite'
 import { parseQuery, parseURL } from 'ufo'
+import type { ObjectHook } from 'rollup'
 
 const debug = createDebug('dz-inspect')
+
+interface TransformInfo {
+  name?: string
+  result: string
+  start: number
+  end: number
+  order?: string
+}
+
+type ResolveIdInfo = string
+type TranformMap = Record<string, TransformInfo[]>
+type ResolveIdMap = Record<string, ResolveIdInfo>
 
 export default function (): Plugin {
   let config: ResolvedConfig
 
-  const transformMap: Record<string, {
-    name?: string
-    result: string
-    start: number
-    end: number
-  }[]> = {}
-  const idMap: Record<string, string> = {}
+  const transformMap: TranformMap = {}
+  const idMap: ResolveIdMap = {}
+
+  type HookHandler<T> = T extends ObjectHook<infer F> ? F : T
+  type HookWrapper<K extends keyof Plugin> = (
+    fn: NonNullable<HookHandler<Plugin[K]>>,
+    context: ThisParameterType<NonNullable<HookHandler<Plugin[K]>>>,
+    args: NonNullable<Parameters<HookHandler<Plugin[K]>>>,
+    order: string
+  ) => ReturnType<HookHandler<Plugin[K]>>
+
+  function hijackHook<K extends keyof Plugin>(plugin: Plugin, name: K, wrapper: HookWrapper<K>) {
+    if (!plugin[name])
+      return
+    debug(`hijack plugin ${name}`)
+
+    // @ts-expect-error future
+    let order = plugin.order || plugin.enforce || 'normal'
+
+    const hook = plugin[name]
+    if ('handler' in hook) {
+      // rollup plugin
+      const oldFn = hook.handler
+      order += `-${hook.order || hook.enforce || 'normal'}`
+      hook.hander = function (this: any, ...args: any) {
+        return wrapper(oldFn, this, args, order)
+      }
+    }
+    else if ('transform' in hook) {
+      // vite plugin
+      const oldFn = hook.transform
+      order += `-${hook.order || plugin.enforce || 'normal'}`
+      hook.transform = function (this: any, ...args: any) {
+        return wrapper(oldFn, this, args, order)
+      }
+    }
+    else {
+      const oldFn = hook
+      order += `-${hook.order || plugin.enforce || 'normal'}`
+      plugin[name] = function (this: any, ...args: any) {
+        return wrapper(oldFn, this, args, order)
+      }
+    }
+  }
 
   function hijackPlugin(plugin: Plugin) {
-    if (plugin.transform) {
-      debug('hijack plugin transform', plugin.name)
-      const _transform = plugin.transform
-      plugin.transform = async function (this: any, code: string, id: string) {
-        const start = Date.now()
-        const _result = await _transform.call(this, code, id)
-        const end = Date.now()
-        const result = typeof _result === 'string' ? _result : _result?.code
+    hijackHook(plugin, 'transform', async (fn, context, args, order) => {
+      const code = args[0]
+      const id = args[1]
+      const start = Date.now()
+      const _result = await fn.apply(context, args)
+      const end = Date.now()
+      const result = typeof _result === 'string' ? _result : _result?.code
 
-        if (result != null) {
-          if (!transformMap[id])
-            transformMap[id] = [{ name: '__load__', result: code, start, end: start }]
-          transformMap[id].push({ name: plugin.name, result, start, end })
-        }
-
-        return _result
+      if (result != null) {
+        if (!transformMap[id])
+          transformMap[id] = [{ name: '__load__', result: code, start, end: start }]
+        transformMap[id].push({ name: plugin.name, result, start, end, order })
       }
-    }
 
-    if (plugin.load) {
-      debug('hijack plugin load', plugin.name)
-      const _load = plugin.load
-      plugin.load = async function (this: any, ...args: any) {
-        const id = args[0]
-        const start = Date.now()
-        const _result = await _load.apply(this, args)
-        const end = Date.now()
-        const result = typeof _result === 'string' ? _result : _result?.code
+      return _result
+    })
 
-        if (result != null)
-          transformMap[id] = [{ name: plugin.name, result, start, end }]
+    hijackHook(plugin, 'load', async (fn, context, args, order) => {
+      const id = args[0]
+      const start = Date.now()
+      const _result = await fn.apply(context, args)
+      const end = Date.now()
+      const result = typeof _result === 'string' ? _result : _result?.code
 
-        return _result
-      }
-    }
+      if (result != null)
+        transformMap[id] = [{ name: plugin.name, result, start, end, order }]
 
-    if (plugin.resolveId) {
-      debug('hijack plugin resolveId', plugin.name)
-      const _resolveId = plugin.resolveId
-      plugin.resolveId = async function (this: any, ...args: any[]) {
-        const id = args[0]
-        const _result = await _resolveId.apply(this, args)
+      return _result
+    })
 
-        const result = typeof _result === 'object' ? _result?.id : _result
+    hijackHook(plugin, 'resolveId', async (fn, context, args) => {
+      const id = args[0]
+      const _result = await fn.apply(context, args)
 
-        if (!id.startsWith('./') && result)
-          idMap[id] = result
+      const result = typeof _result === 'object' ? _result?.id : _result
 
-        return _result
-      }
-    }
+      if (!id.startsWith('./') && result)
+        idMap[id] = result
+
+      return _result
+    })
   }
 
   function resolveId(id: string): string {
