@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, toRefs, watchEffect } from 'vue'
+import { Pane, Splitpanes } from 'splitpanes'
 import { useCodeMirror } from '../composables/codemirror'
 import { guessMode } from '../composables/utils'
 import { lineWrapping, showOneColumn } from '../composables/state'
@@ -7,6 +8,8 @@ import { calculateDiffWithWorker } from '../worker/diff'
 
 const props = defineProps<{ from: string; to: string; id: string }>()
 const { from, to } = toRefs(props)
+
+const panelSize = useLocalStorage('dz-inspect-diff-panel-size', 30)
 
 const fromEl = ref<HTMLTextAreaElement>()
 const toEl = ref<HTMLTextAreaElement>()
@@ -107,26 +110,38 @@ onMounted(() => {
     cm2.endOperation()
   })
 })
+
+const leftPanelSize = computed(() => {
+  return showOneColumn.value
+    ? 0
+    : panelSize.value
+})
 </script>
 
 <template>
-  <div class="grid grid-cols-[1fr,min-content,1fr] h-full overflow-auto">
-    <textarea ref="fromEl" v-text="from" />
-    <div class="border-main border-r" />
-    <textarea ref="toEl" v-text="to" />
-  </div>
+  <Splitpanes>
+    <Pane min-size="10" :size="leftPanelSize" h-max min-h-screen border="r main">
+      <textarea ref="fromEl" v-text="from" />
+    </Pane>
+    <Pane min-size="10" h-max min-h-screen>
+      <textarea ref="toEl" v-text="to" />
+    </Pane>
+  </Splitpanes>
 </template>
 
 <style lang="postcss">
 .diff-added {
   --at-apply: bg-green-400/15;
 }
+
 .diff-removed {
   --at-apply: bg-red-400/15;
 }
+
 .diff-added-inline {
   --at-apply: bg-green-400/30;
 }
+
 .diff-removed-inline {
   --at-apply: bg-red-400/30;
 }

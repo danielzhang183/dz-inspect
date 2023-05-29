@@ -9,6 +9,8 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    Container: typeof import('./components/Container.vue')['default']
+    copy: typeof import('./components/IdList copy.vue')['default']
     DiffEditor: typeof import('./components/DiffEditor.vue')['default']
     IdList: typeof import('./components/IdList.vue')['default']
     NavBar: typeof import('./components/NavBar.vue')['default']

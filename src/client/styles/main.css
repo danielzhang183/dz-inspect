@@ -1,3 +1,5 @@
+@import 'splitpanes/dist/splitpanes.css';
+
 html,
 body,
 #app {
@@ -8,25 +10,13 @@ body,
 
 html.dark {
   background: #121212;
-}
-
-.btn {
-  @apply px-4 py-1 rounded inline-block
-    bg-teal-600 text-white cursor-pointer
-    hover:bg-teal-700
-    disabled:cursor-default disabled:bg-gray-600 disabled:opacity-50;
-}
-
-.icon-btn {
-  @apply inline-block cursor-pointer select-none
-    opacity-75 transition duration-200 ease-in-out
-    hover:opacity-100 hover:text-teal-600;
-  font-size: 0.9em;
-  height: 1em;
+  color-scheme: dark;
 }
 
 .CodeMirror {
-  height: 100% !important;
+  height: max-content !important;
+  font-family: var(--cm-font-family) !important;
+  font-size: 13px !important;
 }
 
 .CodeMirror-scroll {
@@ -34,6 +24,43 @@ html.dark {
   overflow-x: auto !important;
 }
 
-.CodeMirror-gutters {
-  background: rgba(125,125,125,0.05) !important;
+
+/* Splitpanes */
+.splitpanes__splitter {
+  position: relative;
+}
+
+.splitpanes__splitter:before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transition: .2s ease;
+  content: '';
+  transition: opacity 0.4s;
+  z-index: 1;
+}
+
+.splitpanes__splitter:hover:before {
+  background: #8881;
+  opacity: 1;
+}
+
+.splitpanes--vertical>.splitpanes__splitter {
+  width: 0 !important;
+}
+
+.splitpanes--horizontal>.splitpanes__splitter {
+  height: 0 !important;
+}
+
+.splitpanes--vertical>.splitpanes__splitter:before {
+  left: -5px;
+  right: -4px;
+  height: 100%;
+}
+
+.splitpanes--horizontal>.splitpanes__splitter:before {
+  top: -5px;
+  bottom: -4px;
+  width: 100%;
 }

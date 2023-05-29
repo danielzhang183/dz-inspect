@@ -1,5 +1,10 @@
 <template>
-  <main class="text-gray-700 dark:text-gray-200 w-screen h-screen grid grid-rows-[min-content,1fr]">
-    <router-view />
+  <main grid="~ rows-[min-content_1fr]" size="h-screen w-screen" text="gray-700 dark:gray-200">
+    <Suspense>
+      <router-view />
+      <template #fallback>
+        Loading...
+      </template>
+    </Suspense>
   </main>
 </template>

@@ -47,6 +47,7 @@ declare global {
   const isRef: typeof import('vue')['isRef']
   const lineWrapping: typeof import('./composables/state')['lineWrapping']
   const list: typeof import('./composables/state')['list']
+  const listMode: typeof import('./composables/state')['listMode']
   const makeDestructurable: typeof import('@vueuse/core')['makeDestructurable']
   const markRaw: typeof import('vue')['markRaw']
   const msToTime: typeof import('./composables/utils')['msToTime']
@@ -342,6 +343,7 @@ declare module 'vue' {
     readonly isRef: UnwrapRef<typeof import('vue')['isRef']>
     readonly lineWrapping: UnwrapRef<typeof import('./composables/state')['lineWrapping']>
     readonly list: UnwrapRef<typeof import('./composables/state')['list']>
+    readonly listMode: UnwrapRef<typeof import('./composables/state')['listMode']>
     readonly makeDestructurable: UnwrapRef<typeof import('@vueuse/core')['makeDestructurable']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
     readonly msToTime: UnwrapRef<typeof import('./composables/utils')['msToTime']>

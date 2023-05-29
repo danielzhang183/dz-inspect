@@ -16,13 +16,13 @@ interface TransformInfo {
 }
 
 type ResolveIdInfo = string
-type TranformMap = Record<string, TransformInfo[]>
+type TransformMap = Record<string, TransformInfo[]>
 type ResolveIdMap = Record<string, ResolveIdInfo>
 
 export default function (): Plugin {
   let config: ResolvedConfig
 
-  const transformMap: TranformMap = {}
+  const transformMap: TransformMap = {}
   const idMap: ResolveIdMap = {}
 
   type HookHandler<T> = T extends ObjectHook<infer F> ? F : T
