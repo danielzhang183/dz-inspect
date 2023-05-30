@@ -19,19 +19,19 @@ type ResolveIdInfo = string
 type TransformMap = Record<string, TransformInfo[]>
 type ResolveIdMap = Record<string, ResolveIdInfo>
 
+type HookHandler<T> = T extends ObjectHook<infer F> ? F : T
+type HookWrapper<K extends keyof Plugin> = (
+  fn: NonNullable<HookHandler<Plugin[K]>>,
+  context: ThisParameterType<NonNullable<HookHandler<Plugin[K]>>>,
+  args: NonNullable<Parameters<HookHandler<Plugin[K]>>>,
+  order: string
+) => ReturnType<HookHandler<Plugin[K]>>
+
 export default function (): Plugin {
   let config: ResolvedConfig
 
   const transformMap: TransformMap = {}
   const idMap: ResolveIdMap = {}
-
-  type HookHandler<T> = T extends ObjectHook<infer F> ? F : T
-  type HookWrapper<K extends keyof Plugin> = (
-    fn: NonNullable<HookHandler<Plugin[K]>>,
-    context: ThisParameterType<NonNullable<HookHandler<Plugin[K]>>>,
-    args: NonNullable<Parameters<HookHandler<Plugin[K]>>>,
-    order: string
-  ) => ReturnType<HookHandler<Plugin[K]>>
 
   function hijackHook<K extends keyof Plugin>(plugin: Plugin, name: K, wrapper: HookWrapper<K>) {
     if (!plugin[name])

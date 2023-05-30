@@ -8,8 +8,6 @@ import { Pane, Splitpanes } from 'splitpanes'
 const route = useRoute()
 const id = computed(() => route?.query.id as string)
 
-console.log(id)
-
 const currentIdx = ref(0)
 const { data } = useFetch(computed(() => `/__inspect_api/id?id=${encodeURIComponent(id.value)}`))
   .get()
